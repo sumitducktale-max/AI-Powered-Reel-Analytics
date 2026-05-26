@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  /* Dark Slate Base Core Canvas */
+  --bg-main: 224 71% 4%;
+  --bg-card: 224 71% 7%;
+  --bg-glass: 224 71% 6% / 0.45;
+  
+  /* Text Layers */
+  --fg-main: 210 40% 98%;
+  --fg-muted: 215 16% 57%;
+  
+  /* Cyberpunk Brand Identifiers */
+  --primary: 327 90% 57%;    /* Pink Hotspot */
+  --secondary: 262 83% 58%;  /* Purple Accent */
+  --accent: 291 91% 55%;     /* Fuchsia Highlight */
+  
+  /* Raw RGB channels for advanced shadow calculations if required */
+  --primary-rgb: 236, 72, 153;
+  --accent-rgb: 168, 85, 247;
+}
+
+body {
+  background-color: hsl(var(--bg-main));
+  color: hsl(var(--fg-main));
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Elite Glassmorphism Utility Panel */
+.glass-panel {
+  background-color: hsla(var(--bg-glass)) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 1rem;
+}
+
+/* Custom internal scroll container management styling */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}

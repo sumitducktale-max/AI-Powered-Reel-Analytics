@@ -1,0 +1,19 @@
+{
+  "name": "insta-reel-scraper-monorepo",
+  "version": "1.0.0",
+  "description": "Instagram Reel Scraper & Analytics Dashboard - Coordinated Monorepo",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "auth:setup": "npm --prefix backend run auth:setup",
+    "install:all": "npm install && npm --prefix backend install --legacy-peer-deps && npm --prefix client install --legacy-peer-deps"
+  },
+  "keywords": [
+    "instagram",
+    "scraper",
+    "monorepo",
+    "playwright",
+    "react"
+  ],
+  "author": "",
+  "license": "ISC"
+}
