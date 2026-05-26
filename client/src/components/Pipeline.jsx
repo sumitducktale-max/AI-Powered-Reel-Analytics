@@ -8,7 +8,7 @@ const PIPELINE_STEPS = [
   { id: 3, label: 'GraphQL Network Interceptor', desc: 'Monitoring direct response stream buffers...', icon: Terminal },
   { id: 4, label: 'Embed CDN Extraction Layer', desc: 'Extracting video source from public embed frame.', icon: Layers },
   { id: 5, label: 'DOM Schema Fallback Parsing', desc: 'Traversing open-graph & JSON-LD schema data.', icon: Eye },
-  { id: 6, label: 'Gemini 1.5 Vision Model', desc: 'Conducting visual scene & text classification...', icon: RefreshCw },
+  { id: 6, label: 'Gemini Vision Model', desc: 'Conducting visual scene & text classification...', icon: RefreshCw },
 ];
 
 export default function Pipeline({ active }) {
