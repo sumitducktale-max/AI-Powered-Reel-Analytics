@@ -10,7 +10,7 @@ const os = require('os');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffprobeInstaller = require('@ffprobe-installer/ffprobe');
-
+const glob = require('glob');
 // Bind self-contained portable FFmpeg and FFprobe installer paths
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 ffmpeg.setFfprobePath(ffprobeInstaller.path);
@@ -178,11 +178,178 @@ function cleanup(filePaths) {
   });
 }
 
+
+// for extracting the text from the vedio we are splitting it in 1 frame per second
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OCR FRAMES — Scene Detection Primary
+// Fixed FPS Fallback
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// async function extractFramesForOCR(videoPath) {
+//   console.log('[ffmpegService] Extracting OCR frames via scene detection...');
+
+//   const timestamp = Date.now();
+//   const tmpDir = os.tmpdir();
+
+//   // Strategy 1 — Scene change detection
+//   // Jab bhi screen pe kuch naya aaye → frame nikalo
+//   const sceneFrames = await extractSceneFrames(videoPath, timestamp, tmpDir);
+
+//   if (sceneFrames.length >= 5) {
+//     // Scene detection kaam kiya
+//     console.log(`[ffmpegService] Total OCR frames (scene): ${sceneFrames.length}`);
+//     return sceneFrames;
+//   }
+
+//   // Strategy 2 — Fixed FPS fallback
+//   // Scene detection ne kam frames diye → fixed fps try karo
+//   console.log('[ffmpegService] Scene detection yielded too few frames. Using fixed FPS fallback...');
+//   const fixedFrames = await extractFixedFrames(videoPath, timestamp, tmpDir);
+
+//   console.log(`[ffmpegService] Total OCR frames (fixed): ${fixedFrames.length}`);
+//   return fixedFrames;
+// }
+
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// // Strategy 1 — Scene Change Detection
+// // Text overlay aate hi → scene change → frame nikalta hai
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// function extractSceneFrames(videoPath, timestamp, tmpDir) {
+//   return new Promise((resolve) => {
+
+//     const outputPattern = path.join(
+//       tmpDir,
+//       `ocr_scene_${timestamp}_%04d.jpg`
+//     );
+
+//     console.log('[ffmpegService] Running scene detection filter...');
+
+//     ffmpeg(videoPath)
+//       .outputOptions([
+//         // 0.10 = 10% visual change hone pe naya frame
+//         // Lower value = zyada frames (sensitive)
+//         // Higher value = kam frames (only big changes)
+//         '-vf', "select='gt(scene,0.10)',showinfo",
+//         '-vsync', 'vfr',  // variable frame rate — sirf matching frames
+//         '-q:v', '1',      // best quality
+//         '-an'             // no audio stream
+//       ])
+//       .output(outputPattern)
+//       .on('start', (cmd) => {
+//         console.log('[ffmpegService] Scene detection command started.');
+//       })
+//       .on('end', () => {
+
+//         // Windows backslash fix
+//         const globPattern = path
+//           .join(tmpDir, `ocr_scene_${timestamp}_*.jpg`)
+//           .replace(/\\/g, '/');
+
+//         const files = glob.sync(globPattern);
+//         console.log(`[ffmpegService] Scene frames extracted: ${files.length}`);
+//         resolve(files);
+//       })
+//       .on('error', (err) => {
+//         console.warn(
+//           '[ffmpegService] Scene detection failed:',
+//           err.message
+//         );
+//         // Scene detection fail → empty array → caller fixed fps try karega
+//         resolve([]);
+//       })
+//       .run();
+//   });
+// }
+
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// // Strategy 2 — Fixed FPS Fallback
+// // Scene detection fail ya low frames → yeh chalta hai
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// function extractFixedFrames(videoPath, timestamp, tmpDir) {
+//   return new Promise((resolve) => {
+
+//     const outputPattern = path.join(
+//       tmpDir,
+//       `ocr_fixed_${timestamp}_%04d.jpg`
+//     );
+
+//     ffmpeg(videoPath)
+//       .outputOptions([
+//         '-vf', 'fps=3',   // har second 3 frames
+//         '-q:v', '1',
+//         '-an'
+//       ])
+//       .output(outputPattern)
+//       .on('end', () => {
+
+//         // Windows backslash fix
+//         const globPattern = path
+//           .join(tmpDir, `ocr_fixed_${timestamp}_*.jpg`)
+//           .replace(/\\/g, '/');
+
+//         const files = glob.sync(globPattern);
+//         console.log(`[ffmpegService] Fixed frames extracted: ${files.length}`);
+//         resolve(files);
+//       })
+//       .on('error', (err) => {
+//         console.warn(
+//           '[ffmpegService] Fixed FPS extraction failed:',
+//           err.message
+//         );
+//         resolve([]);
+//       })
+//       .run();
+//   });
+// }
+async function extractFramesForOCR(videoPath) {
+  console.log('[ffmpegService] Extracting OCR frames via high-frequency interval sampling...');
+
+  const timestamp = Date.now();
+  const tmpDir = os.tmpdir();
+
+  // We rely directly on a stable, high-density sample rate (3 frames per second)
+  // This captures flashing text, colorful words, and fast subtitles perfectly.
+  const allFrames = await extractFixedFrames(videoPath, timestamp, tmpDir);
+
+  console.log(`[ffmpegService] Total OCR frames: ${allFrames.length}`);
+  return allFrames;
+}
+
+// ── Strategy: Fixed high-density fps ──
+// ── Strategy: Fixed high-density fps ──
+function extractFixedFrames(videoPath, timestamp, tmpDir) {
+  return new Promise((resolve) => {
+    const outputPattern = path.join(tmpDir, `ocr_fixed_${timestamp}_%04d.jpg`);
+
+    ffmpeg(videoPath)
+      .outputOptions([
+        '-vf', 'fps=3',   // Har second 3 frames extract karega
+        '-q:v', '2'
+      ])
+      .output(outputPattern)
+      .on('end', () => {
+        // Windows backslash fix: glob functions text match ke liye forward slash expect karte hain
+        const globPattern = path.join(tmpDir, `ocr_fixed_${timestamp}_*.jpg`).replace(/\\/g, '/');
+
+        const files = glob.sync(globPattern);
+        console.log(`[ffmpegService] Fixed frames successfully extracted: ${files.length}`);
+        resolve(files);
+      })
+      .on('error', (err) => {
+        console.warn('[ffmpegService] High-frequency frame extraction failed:', err.message);
+        resolve([]);
+      })
+      .run();
+  });
+}
+
+
 module.exports = {
   downloadVideo,
   extractFrames,
   extractAudio,
-  cleanup
+  cleanup,
+  extractFramesForOCR
 };
 // /**
 //  * [ffmpegService]
