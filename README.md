@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Instagram Reel Scraper & Analytics Monorepo
 
 A premium, full-stack application split into organized `backend/` and `frontend/` directories to scrape, analyze, and display Instagram Reel metadata in a gorgeous glassmorphic dashboard. Powered by a robust, multi-stage bypass strategy utilizing stealth Playwright browser automation, internal network response interception, and nodemon hot-reloading.
@@ -135,3 +136,7 @@ npm run dev
   }
 }
 ```
+=======
+# AI-Powered-Reel-Analytics
+Conduct high-precision multi-stage scraping, embed asset extraction, and advanced Gemini-driven multimodal visual intelligence reports.
+>>>>>>> 94d63c9f3bffaeaadf60f74efa2a695c8586cf1d
